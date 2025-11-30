@@ -9,6 +9,10 @@ public class BossDamageable : EnemyDamageable
     public MonoBehaviour bossAI;               // assign Michael's AI script
     public Michael boss;                       // reference to Michael.cs
 
+    [Header("Post-Dialogue Sequence")]
+    [Tooltip("Controller để xử lý sequence sau khi dialogue kết thúc (door opening, player walk, scene transition)")]
+    public BossDefeatSequenceController defeatSequenceController;
+
     private bool cutsceneFinished = false;
 
     [Header("Death Audio")]
@@ -60,6 +64,31 @@ public class BossDamageable : EnemyDamageable
     public void NotifyCutsceneFinished()
     {
         cutsceneFinished = true;
+    }
+
+    /// <summary>
+    /// Gọi từ timeline signal sau khi dialogue kết thúc
+    /// Bắt đầu sequence: freeze player, move camera to door, open door, player walk, scene transition
+    /// </summary>
+    public void StartPostDialogueSequence()
+    {
+        if (defeatSequenceController != null)
+        {
+            defeatSequenceController.StartBossDefeatSequence();
+        }
+        else
+        {
+            Debug.LogWarning("[BossDamageable] BossDefeatSequenceController không được assign! Tự động tìm trong scene...");
+            BossDefeatSequenceController controller = FindFirstObjectByType<BossDefeatSequenceController>();
+            if (controller != null)
+            {
+                controller.StartBossDefeatSequence();
+            }
+            else
+            {
+                Debug.LogError("[BossDamageable] Không tìm thấy BossDefeatSequenceController trong scene!");
+            }
+        }
     }
 
     // Called in the timeline
